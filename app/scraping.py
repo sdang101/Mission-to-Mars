@@ -1,4 +1,3 @@
-
 # Import Splinter and BeautifulSoup
 from splinter import Browser
 from bs4 import BeautifulSoup
@@ -20,13 +19,36 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "mars_hemisphere":mars_hemi(browser)
         }
     
-    browser.quit
+    browser.quit()
     
     return data
 
+def mars_hemi(browser):
+    try:
+        url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+        browser.visit(url)
+
+        soup = BeautifulSoup(browser.html, 'html.parser')
+        # Get the 4 hemispheres where class ='item'
+        hemispheres = soup.find_all('div', class_='item')
+
+        # Create empty list for image urls
+        hemisphere_image_urls = []
+        # Loop through each hemisphere
+        for hemisphere in hemispheres:
+            title = (hemisphere.h3.string).replace(' Enhanced', '')
+            img_cache_url = hemisphere.img['src']
+            img_url = f'https://astrogeology.usgs.gov/{img_cache_url}'
+            print(img_url)
+            hemisphere_image_urls.append({'title': title, 'img_url': img_url})  
+    except AttributeError:
+        return None
+
+    return hemisphere_image_urls
 
 def mars_news(browser):
     # Visit the mars nasa news site
@@ -56,39 +78,21 @@ def mars_news(browser):
 
 # Featured Images
 def featured_image(browser):
-    # Visit URL
-    url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
-    browser.visit(url)
-
-    # Find and click the full image button
-    # The browser finds an element by its id.
-    full_image_elem = browser.find_by_id('full_image')
-    # Splinter will 'click' the image to view its full size and save the scraping results in 'full_image_elem'
-    full_image_elem.click()
-
-    # Find the more info button and click that
-    # Tells Splinter to search through the HTML for the specific text "more info."
-    browser.is_element_present_by_text('more info', wait_time=1)
-    # Find the link associated with the 'more info' text
-    more_info_elem = browser.find_link_by_partial_text('more info')
-    # Tell Splinter to click that link by chaining the '.click()' function onto our 'more_info_elem'
-    more_info_elem.click()
-
-    # Parse the resulting html with soup
-    html = browser.html
-    img_soup = BeautifulSoup(html, 'html.parser')
-
     try:
-        # Find the relative image url
-        # figure.lede references the <figure /> tag and its class, lede
-        img_url_rel = img_soup.select_one('figure.lede a img').get("src") # .get("src") pulls the link to the image
+        # Visit URL
+        url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
+        browser.visit(url)
+
+        html = browser.html
+        img_soup = BeautifulSoup(html, 'html.parser')
+
+        a_tag = img_soup.find("a", class_ = "button fancybox")
+        featured_image_url = a_tag["data-fancybox-href"]
+        featured_image_url_with_root = f'https://www.jpl.nasa.gov{featured_image_url}'
     except AttributeError:
         return None
-    
-    # Use the base URL to create an absolute URL
-    img_url = f'https://www.jpl.nasa.gov{img_url_rel}'
-    img_url
-    return img_url
+        
+    return featured_image_url_with_root
 
 
 # --- Scrape Mars Data: Mars Facts ---
