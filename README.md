@@ -7,6 +7,5 @@
 - Use Bootstrap to style the web app.
 
 
-![Mars Site](https://github.com/sdang101/Mission-to-Mars/blob/master/app/templates/Screen%20Shot%202020-06-11%20at%205.57.44%20PM.png)
+![Mars Site](https://github.com/sdang101/Mission-to-Mars/blob/master/app/templates/Screen%20Shot%202020-06-12%20at%2010.55.28%20AM.png)
 
-![Mars Site_1](https://github.com/sdang101/Mission-to-Mars/blob/master/app/templates/Screen%20Shot%202020-06-11%20at%205.58.12%20PM.png)
